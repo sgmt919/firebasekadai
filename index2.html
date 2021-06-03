@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
+    <title>DEV8 dictionary</title>
+    <style>
+        #output li {
+            background: cadetblue;
+            width: 300px;
+            list-style: none;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>ログイン後のページです</h1>
+    <script src="https://www.gstatic.com/firebasejs/8.6.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.2/firebase-analytics.js"></script>
+    <script src="./firebase.js"></script>
+    <script>
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                // サインインしていない状態
+                // サインイン画面に遷移する等
+                location.href = './index2.html';
+            } else {
+                // サインイン済み
+                alert(user.displayName + "さん、こんにちは!");
+            }
+        });
+    </script>
+    <h1>DEV8 IT GLOSSARY</h1>
+    <div id="result"></div>
+
+    <div id="a">
+        <dl>
+            <li>
+                <dt>name</dt>
+                <dd><input type="text" id="name"></dd>
+                <dt>word</dt>
+                <dd><input type="text" id="word"></dd>
+                <br>
+                <dt>参考URL</dt>
+                <dd><input type="text" id="url"></dd>
+                <br>
+                <dt>意味</dt>
+                <dd><input type="text" id="imi"></dd>
+
+            </li>
+        </dl>
+    </div>
+    <style>
+        h1 {
+            text-align: center;
+            font-family: 'Lato', 'Noto Sans JP', 'ヒラギノ角ゴ ProN', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif;
+        }
+
+        /* li {
+            list-style: none;
+            font-size: 15px;
+            text-align: center;
+        } */
+
+        /* #name {
+            margin-left: 40px;
+
+        }
+
+        #word {
+            margin-left: 40px;
+
+        }
+
+        #url {
+            margin-left: 40px;
+        }
+
+        #imi {
+            margin-left: 40px;
+        } */
+        form dl dt {
+            width: 165px;
+            padding: 10px 0;
+            float: left;
+            clear: both;
+        }
+
+        form dl dd {
+            padding: 10px 0;
+        }
+
+        dl li {
+            display: flex;
+        }
+    </style>
+
+    <li>
+        <button id="send">リストに入れる</button>
+    </li>
+    </ul>
+    <style>
+        html {
+            background-color: bisque;
+            font-family: ’235MKSD-Ultra Light AL’, ’なごみ極細ゴシック’;
+        }
+
+        #send {
+            display: inline-block;
+            padding: .75em 4em;
+            border: 2px dotted #333;
+            border-radius: 3em .5em 2em .3em/.4em 2em .9em 3em;
+            color: #333;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        th,
+        td {
+            border: solid 1px;
+            /* 枠線指定 */
+        }
+
+        table {
+            border-collapse: collapse;
+            /* セルの線を重ねる */
+        }
+
+        th {
+            width: 300px;
+            /* 幅指定 */
+            height: 80px;
+            /* 高さ指定 */
+            color: cadetblue;
+            /* 文字色指定 */
+        }
+    </style>
+
+    <!-- データ出力場所 -->
+    <ul id="output"></ul>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase.js"></script>
+
+
+
+
+
+    <div id="result"></div>
+    <script>
+
+        var firebaseConfig = {
+            // apiKey:
+            authDomain: "dev8-dictionary.firebaseapp.com",
+            projectId: "dev8-dictionary",
+            storageBucket: "dev8-dictionary.appspot.com",
+            messagingSenderId: "691568100909",
+            appId: "1:691568100909:web:05d010c97744136eb49aa4"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore().collection('dictionary');
+
+    </script>
+
+
+    <script>
+        // 日時をいい感じの形式にする関数
+        function convertFromFirestoreTimestampToDatetime(timestamp) {
+            const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+            const Y = _d.getFullYear();
+            const m = (_d.getMonth() + 1).toString().padStart(2, '0');
+            const d = _d.getDate().toString().padStart(2, '0');
+            const H = _d.getHours().toString().padStart(2, '0');
+            const i = _d.getMinutes().toString().padStart(2, '0');
+            const s = _d.getSeconds().toString().padStart(2, '0');
+            return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+        }
+        $('#send').on('click', function () {
+            const data = {
+                name: $('#name').val(),
+                word: $('#word').val(),
+                url: $('#url').val(),
+                imi: $('#imi').val(),
+                time: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+            db.add(data);
+            $('#imi').val('');
+        });
+        db.orderBy('word', 'desc').onSnapshot(function (querySnapshot) {
+            // console.log(querySnapshot.docs);
+            const dataArray = []; // 必要なデータだけが入った新しい配列を作成 
+            querySnapshot.docs.forEach(function (doc) {
+                const data = {
+                    id: doc.id,
+                    data: doc.data(),
+                };
+                dataArray.push(data);
+            });
+            console.log(dataArray);
+
+            console.log
+            const tagArray = [];
+            dataArray.forEach(function (data) {
+                tagArray.push(`
+      
+<div class="my-parts">       
+     <table>
+            
+         
+                <tr>
+                    <td>${data.data.word}</td>
+                    <td>${data.data.name}</td>
+                    <td>${convertFromFirestoreTimestampToDatetime(data.data.time.seconds)}</td>
+                    <td>${data.data.url}</td>
+                </tr>
+               
+        </table>
+    </div>
+      `)
+            });
+            $('#output').html(tagArray);
+        });
+    </script>
+
+    <!-- <div class="my-parts">
+        <table>
+            <tr>
+                <th>table data</th>
+                <th>table data</th>
+                <th>table data</th>
+            </tr>
+            <tr>
+                <td>table data</td>
+                <td>table data</td>
+                <td>table data</td>
+            </tr>
+            <tr>
+                <td>table data</td>
+                <td>table data</td>
+                <td>table data</td>
+            </tr>
+            <tr>
+                <td>table data</td>
+                <td>table data</td>
+                <td>table data</td>
+            </tr>
+            <tr>
+                <td>table data</td>
+                <td>table data</td>
+                <td>table data</td>
+            </tr>
+        </table>
+    </div> -->
+    <style>
+        .my-parts {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+
+        .my-parts table {
+            border-collapse: collapse;
+            border: 1px solid rgba(0, 0, 0, .1);
+            table-layout: fixed;
+            width: 1300px;
+        }
+
+        .my-parts th,
+        .my-parts td {
+            border: 1px solid rgba(0, 0, 0, .1);
+            padding: .6em;
+            text-align: center;
+            background: #fff;
+        }
+
+        .my-parts th {
+            background: #009688;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+
+    <hr>
+    <script>
+
+    </script>
+</body>
+
+</html>
